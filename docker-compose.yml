@@ -1,0 +1,36 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: manu-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/polymarket_advisor
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn polymarket_advisor.api.app:app --host 0.0.0.0 --port 8000
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    container_name: manu-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: polymarket_advisor
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d polymarket_advisor"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

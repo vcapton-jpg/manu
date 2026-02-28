@@ -1,0 +1,2 @@
+# Config dev (optionnel, priorité aux variables d’environnement)
+log_level: INFO
